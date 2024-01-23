@@ -6,7 +6,7 @@
 #include <string>
 using namespace std;
 
-void binaryToDecimal(string inputString);
+void binaryToHexadecimal(string inputString);
 
 int main(){
     string inputString;  // String provided by user that is to be converted
@@ -16,14 +16,14 @@ int main(){
     cin >> inputString;
 
     while (inputString != "q"){
-        binaryToDecimal(inputString);
+        binaryToHexadecimal(inputString);
         cout << "\nPlease enter your binary number and press enter or 'q' to quit: ";
         cin >> inputString;
     }
     cout << "Now Exiting...";
 }
 
-void binaryToDecimal(string inputString){
+void binaryToHexadecimal(string inputString){
 
     int currentPower = 1;
     char currentChar = '0';
@@ -43,5 +43,5 @@ void binaryToDecimal(string inputString){
         currentPower *= 2;
     }
     
-    cout << inputString << " is " << hex << decimalOutput << " in hexidecimal." ;
+    cout << inputString << " is " << hex << decimalOutput << " in hexadecimal." ;
 }
