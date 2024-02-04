@@ -7,36 +7,40 @@
 using namespace std;
 
 // Global Variables
-const set<int> U = {1, 2, 3, 4, 5 ,6 ,7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
-int MENU_FIRST = 1;
-int MENU_LAST = 6;
-int EXIT = 6;
+const set<int> U = {1, 2, 3, 4, 5 ,6 ,7, 8, 9, 10, 11, 
+                    12, 13, 14, 15, 16, 17, 18, 19, 20};  // Universal Set
+int MENU_FIRST = 1; // Lower bound for menu
+int MENU_LAST = 6;  // Upper bound for menu
+int EXIT = 6;       // Program exit menu option
 const string PROGRAM_NAME = "SetTheory.cpp";
 const string PROGRAM_AUTHOR = "John Glenn";
 
 // Function Prototypes
 void calculateDifference(set<int>, set<int>);
-void displayUnion(set<int>, set<int>);
-void displayIntersection(set<int>, set<int>);
+set<int> cloneSet(set<int>);
 void displayComplements(set<int>, set<int>);
+
+void displayIntersection(set<int>, set<int>);
+void displayUnion(set<int>, set<int>);
 bool isInRange(int);
 bool isInteger(string);
 int main();
 void printMenu(set<int>, set<int>);
+void printSetContents(set<int>, set<int>);
 void ProgramGreeting();
 int promptMenu(set<int>, set<int>);
-void printSetContents(set<int>, set<int>);
 string setToString(set<int>);
 void showSymmetricDifference(set<int>, set<int>);
 bool validateSet(set<int>);
-set<int> cloneSet(set<int>);
+
+
 int main() {
     ProgramGreeting();
 
-    set<int> setA = {1,2,9, 11, 13, 3,4,5};
-    set<int> setB = {3,4,5,6,7};
+    set<int> setA = {1,2,9, 11, 13, 3,4,5};    // All calculations are based on these sets
+    set<int> setB = {3,4,5,6,7};               // ----------------------------------------
     
-    if (!validateSet(setA)){
+    if (!validateSet(setA)){  // Ensure that the sets are valid.
         cout << "An item in setA is not valid. It is not included in the universal set.";
         exit(1);
     }else if (!validateSet(setB)){
@@ -46,7 +50,7 @@ int main() {
 
     int menuChoice = -1;
     do {
-        menuChoice = promptMenu(setA, setB);
+        menuChoice = promptMenu(setA, setB);   // Display menu and get choice from user
         switch(menuChoice){
             case 1:
                 displayUnion(setA, setB);
@@ -73,7 +77,7 @@ int main() {
         cout << endl << string(100, '*') << endl << endl;
         
     }
-    while (menuChoice != EXIT);
+    while (menuChoice != EXIT);  // Loop until user enters EXIT value
 }
 
 void displayUnion(set<int> setA, set<int> setB){
@@ -120,15 +124,14 @@ void displayComplements(set<int> setA, set<int> setB){
 
 void calculateDifference(set<int> setA, set<int> setB){
     set<int> outSet = cloneSet(setA);
-
     for (set<int>::iterator point=setB.begin(); point != setB.end(); point++){
         if (outSet.count(*point)){
             outSet.erase(*point);
         }
     }
     cout << "\nThe result of 'A - B' is " << setToString(outSet) << endl;
-    outSet = cloneSet(setB);
 
+    outSet = cloneSet(setB);
     for (set<int>::iterator point=setA.begin(); point != setA.end(); point++){
         if (outSet.count(*point)){
             outSet.erase(*point);
@@ -136,7 +139,6 @@ void calculateDifference(set<int> setA, set<int> setB){
     }
 
     cout << "The result of 'B - A' is " << setToString(outSet) << endl;
-
 }
 
 set<int> cloneSet(set<int> srcSet){
@@ -149,17 +151,17 @@ set<int> cloneSet(set<int> srcSet){
 
 void showSymmetricDifference(set<int> setA, set<int> setB){
     set<int> outSet = {};
+    
+    // Iterate through setA and add items that are NOT in setB to outSet
     for (set<int>::iterator point=setA.begin(); point != setA.end(); point++){
-        if (setB.count(*point)){
-            continue;
-        }else{
+        if (!setB.count(*point)){
             outSet.insert(*point);
         }
     }
+    
+    // Iterate through setB and add items that are NOT in setA to outSet
     for (set<int>::iterator point=setB.begin(); point != setB.end(); point++){
-        if (setA.count(*point)){
-            continue;
-        }else{
+        if (!setA.count(*point)){
             outSet.insert(*point);
         }
     }
@@ -167,14 +169,11 @@ void showSymmetricDifference(set<int> setA, set<int> setB){
 }
 
 bool isInteger(string inString){
-    int strLength = inString.size();
     char currentChar;
-    if (strLength > 0){
-        for (char current=0; current < strLength - 1; current++){
+    if (inString.size() > 0){
+        for (char current=0; current < inString.size() - 1; current++){
             currentChar = inString[current];
-            if (isdigit(currentChar)){
-                continue;
-            }else{
+            if (!isdigit(currentChar)){
                 cout << "'" << currentChar << "' is an invalid character...";
                 return false;
             }
@@ -188,7 +187,7 @@ bool isInteger(string inString){
 
 string setToString(set<int> inSet){
     string outString = "{";
-    bool first = true;
+    bool first = true;       // Flag varfiable for comma placement
     for (set<int>::iterator point=inSet.begin(); point != inSet.end(); point++){
         if (!first){
             outString += ", ";
