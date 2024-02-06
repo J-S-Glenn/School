@@ -1,0 +1,2 @@
+C:\Users\W1221976\Downloads\VS2012_files\console32\console32\Debug\console32.vcxproj.AssemblyReference.cache
+C:\Users\W1221976\Downloads\VS2012_files\console32\console32\Debug\console32.vcxproj.SuggestedBindingRedirects.cache
