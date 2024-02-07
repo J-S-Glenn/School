@@ -43,5 +43,5 @@ void binaryToDecimal(string inputString){
         currentPower *= 2;
     }
     
-    cout << inputString << " is " << decimalOutput << " in decimal." ;
+    cout << inputString << " is " << hex << decimalOutput << " in hexadecimal." ;
 }
