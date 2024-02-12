@@ -19,7 +19,6 @@ const string PROGRAM_AUTHOR = "John Glenn";
 void calculateDifference(set<int>, set<int>);
 set<int> cloneSet(set<int>);
 void displayComplements(set<int>, set<int>);
-
 void displayIntersection(set<int>, set<int>);
 void displayUnion(set<int>, set<int>);
 bool isInRange(int);
