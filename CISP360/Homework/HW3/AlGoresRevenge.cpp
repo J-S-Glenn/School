@@ -39,7 +39,7 @@ string strToUpper(string);
 void tempRiseEval(int);
 
 int main() {
-	int yrCount = 15;  // Number of years to forcast
+	int yrCount = 5;  // Number of years to forcast
 	ProgramGreeting();
 
 	// Speciﬁcation C2 - 5 year ocean rise
@@ -99,19 +99,20 @@ void oceanRiseEval(int years){
 	printRow("Ocean Level Forcast", "Millimeters (Inches)",true);
 	for (int count = 0; count < years; count++){
 		oceanLevel += OCEAN_INC_PER_YEAR;
+		// Specification B1 - Mixed length output
 		printRow("Year " + to_string(count+1),roundStr(to_string(oceanLevel)) + " mm ("+ roundStr(to_string(MM2IN * oceanLevel)) + " In)");
 	}
 	cout << endl;
 }
 
 void ProgramGreeting() {
-	// ProgramGreeting1
 	cout << "Initiallizing...\n\nDecrypting...\n\nFeeding the dogs....\n\n"
 	     << "Contemplating life choices...\n\nInitialization complete!\n\n"
 	     << string('*',62) << "\nProgram Name: " << PROGRAM_NAME << "\nAuthor:" 
 		 << PROGRAM_AUTHOR << endl << string('*',62) << endl << endl;
 }
 
+// Specification A3 - One Function
 string roundStr(string num, int places){
 	return num.substr(0, num.find('.') + places+1);
 }
