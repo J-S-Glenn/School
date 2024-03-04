@@ -18,26 +18,29 @@ const string STR_EURO = "Euro";
 const int C_GBP = 3;
 const string STR_GBP = "GBP";
 const string STR_USD = "USD";
-const int C_FLIP = 4;
-const int OP_EXIT = 5;
+const int C_ALL = 4;
+const int C_FLIP = 5;
+const int OP_EXIT = 6;
 const int MENU_FIRST = 1;
-const int MENU_LAST = 5;
+const int MENU_LAST = OP_EXIT;
 
 // Speciﬁcation C1 - Main Menu
 const string MENU_A = "\
 1. USD -> Yen\n\
 2. USD -> Euro\n\
 3. USD -> British Pound\n\
-4. Flip Conversion\n\
-5. Quit w/o conversion\n\n" ;
+4. USD -> Yen, Euro, GBP\n\
+5. Flip Conversion\n\
+6. Quit w/o conversion\n\n" ;
 
 // Speciﬁcation C2 - Reverse Menu
 const string MENU_B = "\
 1. Yen -> USD\n\
 2. Euro -> USD\n\
 3. Pound -> USD\n\
-4. Quit w/o conversion\n\
-5. Quit w/o conversion\n";
+4. Yen, Euro, GBP -> USD\n\
+5. Flip Conversion\n\
+6. Quit w/o conversion\n";
 
 // Conversion constants
 const float USD2YEN = 150.0980;    // 1 USD = 150.0980 Yen
@@ -49,13 +52,16 @@ const int VAR_COL_WIDTH = 25;      // Width of columns in tableS
 // Function Prototypes
 // Speciﬁcation B1 - Three Functions
 void autoHeader(string);
-void currConvert(float, string, bool);
-bool checkRange(int, int, int);
+void convertAll(bool);
+float currConvert(float, float, bool);
 void displayMenu(int);
 void genUnderline(string);
 bool isFloat(string);
 bool isInt(string);
+void printRow(string, float, float, bool=false);
 void printRow(string, string, bool=false);
+void printRow(float, float, bool=false);
+string prompt(string);
 void ProgramGreeting();
 int promptIntInRange(string, int=MENU_FIRST, int=MENU_LAST);
 float promptFloatInRange(string, float=CURRENCY_MIN, float=CURRENCY_MAX);
@@ -63,9 +69,14 @@ string roundStr(string, int=3);
 string strToUpper(string);
 
 int main() {
+	float srcAmount = 0;
+	float newAmount = 0;
+	float rate = 0;
 	int menu = 1;          // Initialize w/ standard menu
 	bool fromUSD = true;   // Specify if we are converting to or from USD
+	bool runConversion = false;
 	int int_choice = 0;    // Menu choice from user
+	string dst, src;
 	ProgramGreeting();
 
 	
@@ -76,17 +87,29 @@ int main() {
 	
 		switch (int_choice){
 			case C_YEN:
-				currConvert(USD2YEN, STR_YEN, fromUSD);
+				src = (fromUSD) ? STR_USD : STR_YEN;
+				dst = (fromUSD) ? STR_YEN : STR_USD;
+				rate = USD2YEN;
+				runConversion = true;
 				break;
 			case C_EURO:
-				currConvert(USD2EURO, STR_EURO, fromUSD);
+				src = (fromUSD) ? STR_USD : STR_EURO;
+				dst = (fromUSD) ? STR_EURO : STR_USD;
+				rate = USD2EURO;
+				runConversion = true;
 				break;
 			case C_GBP:
-				currConvert(USD2GBP, STR_GBP, fromUSD);
+				src = (fromUSD) ? STR_USD : STR_GBP;
+				dst = (fromUSD) ? STR_GBP : STR_USD;
+				rate = USD2GBP;
+				runConversion = true;
 				break;
 			case C_FLIP:
 				menu *= -1;
 				fromUSD = !fromUSD;
+				break;
+			case C_ALL:
+				convertAll(fromUSD);
 				break;
 			case OP_EXIT:
 				cout << "Now Exiting...\n";
@@ -94,6 +117,14 @@ int main() {
 				break;
 			default:
 				cout << "Option not found...please try again...\n\n";
+		}
+		if (runConversion){
+			srcAmount = promptFloatInRange("Enter value in " + src + " to be converted to " + dst + ": ");
+			newAmount = currConvert(rate, srcAmount, fromUSD);
+			printRow(src, dst, true);
+			printRow(srcAmount, newAmount);
+			cout << endl;
+			runConversion = false;
 		}
 		
 	}
@@ -106,28 +137,39 @@ void autoHeader(string header){
 	genUnderline(header);
 }
 
-void currConvert(float rate, string currName, bool fromUSD){
-	float newValue, srcAmount;
-	string src, dst, prompt;
+void convertAll(bool fromUSD){
+	float srcAmount = 5;
+	string src, dst;
+	float newAmount;
+	
+	printRow("Conversion", "Results", true);
+
+	src = (fromUSD) ? STR_USD : STR_YEN;
+	dst = (fromUSD) ? STR_YEN : STR_USD;
+	newAmount = currConvert(USD2YEN, srcAmount, fromUSD);
+	printRow((src + " -> " + dst), srcAmount, newAmount);
+
+	src = (fromUSD) ? STR_USD : STR_EURO;
+	dst = (fromUSD) ? STR_EURO : STR_USD;
+	newAmount = currConvert(USD2EURO, srcAmount, fromUSD);
+	printRow((src + " -> " + dst), srcAmount, newAmount);
+	
+	src = (fromUSD) ? STR_USD : STR_GBP;
+	dst = (fromUSD) ? STR_GBP : STR_USD;
+	newAmount = currConvert(USD2GBP, srcAmount, fromUSD);
+	printRow((src + " -> " + dst), srcAmount, newAmount);
+}
+
+float currConvert(float rate, float amount, bool fromUSD){
+	float newValue;
 
 	if (fromUSD){
-		src = STR_USD;
-		dst = currName;
+		newValue = amount * rate;
 	}else{
-		src = currName;
-		dst = STR_USD;
+		newValue = amount / rate;
 	}
 
-	prompt = "Enter value in " + src + " to be converted to " + dst + ": ";
-	srcAmount = promptFloatInRange(prompt);
-
-	if (fromUSD){
-		newValue = srcAmount * rate;
-	}else{
-		newValue = srcAmount / rate;
-	}
-
-	cout << fixed << setprecision(3) << srcAmount << " in " << src << " is " << newValue << " in " << dst << endl << endl;
+	return newValue;
  }
 
 void displayMenu(int menuChoice){
@@ -155,16 +197,15 @@ bool isFloat(string inStr){
 	string currentNumber;
 	for (int ch = 0; ch <= inStr.size() - 1; ch++){
 		if (!isdigit(inStr[ch])){
-			isValid = false;
-			break;
-		}
-		else if (inStr[ch] == '.'){
-			if (foundDot){
-				cout << "\n\033[1;31m INVALID INPUT! Found more than one 'dot'. \033[0m";
-				isValid = false;
-				break;
-			}else{
-				foundDot = true;
+			if (inStr[ch] == '.'){
+				if (foundDot){
+					cout << "\n\033[1;31mINVALID INPUT! Found more than one 'dot'. \033[0m" << endl << endl;
+					isValid = false;
+					break;
+				}else{
+					foundDot = true;
+					isValid = true;
+				}
 			}
 		}
 	}
@@ -181,6 +222,15 @@ bool isInt(string inStr){
 	return isValid;
 }
 
+void printRow(string inStr, float inFlt1, float inFlt2, bool printCap){
+    char div = (printCap) ? '=':'-';
+    if (printCap){
+        cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";    
+    };
+    cout << fixed << setprecision(3) << "|" << setw(VAR_COL_WIDTH) << inStr << "|" << setw(VAR_COL_WIDTH/3) << inFlt1 << setw(VAR_COL_WIDTH/3) <<  " -> " << setw(VAR_COL_WIDTH/3+1) << inFlt2 << "|\n";
+    cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";
+}
+
 void printRow(string inStr, string inStr2, bool printCap){
     char div = (printCap) ? '=':'-';
     if (printCap){
@@ -190,24 +240,41 @@ void printRow(string inStr, string inStr2, bool printCap){
     cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";
 }
 
+void printRow(float inFlt1, float inFlt2, bool printCap){
+    char div = (printCap) ? '=':'-';
+    if (printCap){
+        cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";    
+    };
+    cout << "|" << setw(VAR_COL_WIDTH) << inFlt1 << "|" << setw(VAR_COL_WIDTH) << inFlt2 << "|\n";
+    cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";
+}
+
 // Speciﬁcation C3 - Input Prompt Function
+string getPrompt(string prompt){
+	string strIn;
+
+	cout << prompt << endl << endl;
+	cin >> strIn;
+
+	return strIn;
+}
+
 float promptFloatInRange(string prompt, float min, float max){
 	bool isValid = false;
 	string inStr = "";
 	float floatIn = INVALID;
 
 	while (!isValid){
-		cout << prompt << endl << endl;
-		cin >> inStr;
+		inStr = getPrompt(prompt);
 		if (isInt(inStr) or isFloat(inStr)){
 			floatIn = stof(inStr);
 			if (floatIn >= min and floatIn <= max){
 				isValid = true;
 			}else{
-				cout << floatIn << " is not a valid option. Must be between "<< min << "and" << max << endl;
+				cout << floatIn << " is not a valid option. Must be between "<< min << " and " << max << endl;
 			}
 		}else{
-			cout << "You have entered an invalid option [" << inStr << "]. \n\n Please try again...\n\n";
+			cout << "\n\033[1;31mYou have entered an invalid option [" << inStr << "]. Please try again...\033[0m1\n\n";
 		}
 	}
 
@@ -220,8 +287,7 @@ int promptIntInRange(string prompt, int min, int max){
 	int int_choice;
 
 	while (!isValid){
-		cout << prompt << endl << endl;
-		cin >> inStr;
+		inStr = getPrompt(prompt);
 		if (isInt(inStr)){
 			int_choice = stoi(inStr);
 			if (int_choice >= min and int_choice <= max){
