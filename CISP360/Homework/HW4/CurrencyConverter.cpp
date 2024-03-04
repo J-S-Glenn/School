@@ -1,5 +1,5 @@
 // CurrencyConverter.cpp
-// 2/15/2024
+// 3/3/2024
 // John Glenn
 
 #include <iostream>
@@ -26,21 +26,21 @@ const int MENU_LAST = OP_EXIT;
 
 // Speciﬁcation C1 - Main Menu
 const string MENU_A = "\
-1. USD -> Yen\n\
-2. USD -> Euro\n\
-3. USD -> British Pound\n\
-4. USD -> Yen, Euro, GBP\n\
+1. USD --------------> Yen\n\
+2. USD --------------> Euro\n\
+3. USD --------------> British Pound\n\
+4. USD --------------> Yen, Euro, and GBP\n\
 5. Flip Conversion\n\
 6. Quit w/o conversion\n\n" ;
 
 // Speciﬁcation C2 - Reverse Menu
 const string MENU_B = "\
-1. Yen -> USD\n\
-2. Euro -> USD\n\
-3. Pound -> USD\n\
-4. Yen, Euro, GBP -> USD\n\
+1. Yen   --------------> USD\n\
+2. Euro  --------------> USD\n\
+3. Pound --------------> USD\n\
+4. Yen, Euro, and GBP -> USD\n\
 5. Flip Conversion\n\
-6. Quit w/o conversion\n";
+6. Quit w/o conversion\n\n";
 
 // Conversion constants
 const float USD2YEN = 150.0980;    // 1 USD = 150.0980 Yen
@@ -61,10 +61,11 @@ bool isInt(string);
 void printRow(string, float, float, bool=false);
 void printRow(string, string, bool=false);
 void printRow(float, float, bool=false);
-string prompt(string);
 void ProgramGreeting();
+string prompt(string);
 int promptIntInRange(string, int=MENU_FIRST, int=MENU_LAST);
 float promptFloatInRange(string, float=CURRENCY_MIN, float=CURRENCY_MAX);
+void redPrompt(string);
 string roundStr(string, int=3);
 string strToUpper(string);
 
@@ -137,11 +138,14 @@ void autoHeader(string header){
 	genUnderline(header);
 }
 
+// Speciﬁcation B3 - Convert All 
 void convertAll(bool fromUSD){
 	float srcAmount = 5;
 	string src, dst;
 	float newAmount;
 	
+	srcAmount = promptFloatInRange("Enter value in " + src + " to be converted to " + dst + ": ");
+
 	printRow("Conversion", "Results", true);
 
 	src = (fromUSD) ? STR_USD : STR_YEN;
@@ -160,6 +164,7 @@ void convertAll(bool fromUSD){
 	printRow((src + " -> " + dst), srcAmount, newAmount);
 }
 
+// Speciﬁcation B2 - Conversion Function(s)
 float currConvert(float rate, float amount, bool fromUSD){
 	float newValue;
 
@@ -191,7 +196,6 @@ void genUnderline(string inStr){
 }
 
 bool isFloat(string inStr){
-	cout << "Checking to see if [" << inStr << "] is a float...\n\n";
 	bool isValid = false;
 	bool foundDot = false;
 	string currentNumber;
@@ -199,7 +203,7 @@ bool isFloat(string inStr){
 		if (!isdigit(inStr[ch])){
 			if (inStr[ch] == '.'){
 				if (foundDot){
-					cout << "\n\033[1;31mINVALID INPUT! Found more than one 'dot'. \033[0m" << endl << endl;
+					redPrompt("INVALID INPUT! Found more than one 'dot'!\n\n");
 					isValid = false;
 					break;
 				}else{
@@ -214,7 +218,6 @@ bool isFloat(string inStr){
 
 bool isInt(string inStr){
 	bool isValid;
-	cout << "Checking to see if [" << inStr << "] is an int...\n\n";
 
 	for (int ch = 0; ch <= inStr.size() - 1; ch++){
 		isValid = isdigit(inStr[ch]);
@@ -245,18 +248,23 @@ void printRow(float inFlt1, float inFlt2, bool printCap){
     if (printCap){
         cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";    
     };
-    cout << "|" << setw(VAR_COL_WIDTH) << inFlt1 << "|" << setw(VAR_COL_WIDTH) << inFlt2 << "|\n";
-    cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";
+    cout << fixed << setprecision(3)  << "|" << setw(VAR_COL_WIDTH) << inFlt1 << "|" << setw(VAR_COL_WIDTH);
+	cout << inFlt2 << "|\n|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";
 }
 
 // Speciﬁcation C3 - Input Prompt Function
 string getPrompt(string prompt){
 	string strIn;
 
-	cout << prompt << endl << endl;
+	cout << prompt;
 	cin >> strIn;
 
 	return strIn;
+}
+
+// Specification A3 - Red Error Text
+void redPrompt(string prompt){
+	cout << "\n\033[1;31m" << prompt << "\033[0m\n";
 }
 
 float promptFloatInRange(string prompt, float min, float max){
@@ -271,10 +279,13 @@ float promptFloatInRange(string prompt, float min, float max){
 			if (floatIn >= min and floatIn <= max){
 				isValid = true;
 			}else{
-				cout << floatIn << " is not a valid option. Must be between "<< min << " and " << max << endl;
+				// Specification A1 - Sanity Check
+				redPrompt(to_string(floatIn) + " is not a valid option. Must be between " + to_string(min) + " and " + to_string(max));
+				cout << "Program Ended\n\n";
+				exit(1);
 			}
 		}else{
-			cout << "\n\033[1;31mYou have entered an invalid option [" << inStr << "]. Please try again...\033[0m1\n\n";
+			redPrompt("You have entered an invalid option [" + inStr + "]. Please try again...\n\n");
 		}
 	}
 
@@ -293,10 +304,13 @@ int promptIntInRange(string prompt, int min, int max){
 			if (int_choice >= min and int_choice <= max){
 				isValid = true;
 			}else{
-				cout << int_choice << " is not a valid option. Must be between "<< min << "and" << max << endl;
+				// Specification A2 - Valid Menu Selection only
+				redPrompt((to_string(int_choice) + " is not a valid option. Must be between " + to_string(min) + " and " +  to_string(max) + "\n\n"));
+				cout << "Program Ended\n\n";
+				exit(1);
 			}
 		}else{
-			cout << "You have entered an invalid option [" << inStr << "]. \n\n Please try again...\n\n";
+			redPrompt("You have entered an invalid option [" + inStr + "]. \n\n Please try again...\n\n");
 		}
 	}
 
