@@ -3,6 +3,7 @@
 // John Glenn
 
 #include <iostream>		// Any other libraties, too
+#include <iomanip>
 using namespace std;
 
 struc somestruct {
@@ -14,6 +15,8 @@ Class someclass {
 };
 
 // Global Variables
+const string PROGRAM_NAME = "CurrencyConverter.cpp";
+const string PROGRAM_AUTHOR = "John Glenn";
 
 // Function Prototypes
 void ProgramGreeting();		// All programs will have this method
@@ -28,7 +31,10 @@ int main() {
 
 
 void ProgramGreeting() {
-// Code goes here
+	cout << "Initiallizing...\n\nDecrypting...\n\nFeeding the dogs....\n\n"
+	     << "Contemplating life choices...\n\nInitialization complete!\n\n"
+	     << string('*',62) << "\nProgram Name: " << PROGRAM_NAME << "\nAuthor:" 
+		 << PROGRAM_AUTHOR << endl << string('*',62) << endl << endl;
 }
 
 void Unittest() {
