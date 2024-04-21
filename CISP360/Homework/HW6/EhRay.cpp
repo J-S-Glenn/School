@@ -22,10 +22,11 @@ const string BG_LT_GRAY =  "\033[48;5;7m";
 const string RST = "\033[0m";
 const int RNG_MIN = 0;
 const int RNG_MAX = 100;
-stack<double> tempstack;
+stack<int> tempstack;
 const double COMP_TOLERANCE = .05;
-const int VAR_COL_WIDTH = 25;      // Width of columns in tableS
+const int VAR_COL_WIDTH = 9;      // Width of columns in tableS
 const int ARRAY_SIZE = 10;
+const int STACK_SIZE = 20;
 // Function Prototypes
 void ProgramGreeting(ofstream&);
 void announceFunction(string, string, ofstream&);
@@ -33,7 +34,9 @@ string getDate();
 bool isFloat(string, ofstream&);
 bool isInt(string, ofstream&);
 float promptFloatInRange(string, float, float, ofstream&);
-void printRow(float, float, bool, ofstream&);
+void printRow(float [], ofstream&);
+void printRow(int [], ofstream&);
+void printStackRow(int [], ofstream&);
 double prompt(string, double, double, ofstream&);
 int prompt(const string, ofstream&);
 int prompt(const string, int, int, ofstream&);
@@ -45,8 +48,18 @@ void initializeArrays(int*& intArr,float*& fltArr, ofstream&);
 void minAndMax(int [],float [], ofstream&);
 void printArray(int [], ofstream&);
 void printArray(float [], ofstream&);
-void arraySum(int intArr[], ofstream&);
-void arraySum(float intArr[], ofstream&);
+void arraySum(int [], ofstream&);
+void arraySum(float [], ofstream&);
+void arraySum(int [], ofstream&);
+void arraySum(float [], ofstream&);
+void arrayRev(int*& , ofstream&);
+void arrayRev(float*& , ofstream&);
+void arrayShiftRight(int*&, ofstream&);
+void arrayShiftRight(float*&, ofstream&);
+void loadStack(ofstream&);
+void printStack(ofstream&);
+void numberSearch(int [], float [], ofstream&);
+string getPrompt(string prompt, ofstream&);
 // Specification A3 - Random Number in Singleton Pattern
 class SpontaneousDigitDispenser{
 	private:
@@ -98,37 +111,205 @@ int main() {
 	int* arrInt = nullptr;
 	float* arrFloat = nullptr;
 	initializeArrays(arrInt, arrFloat, logFile);
+
+	// Speciﬁcation C1 – Display Array
+	cout << FG_ORANGE << "Specification C1 Start" << RST << endl;
 	printArray(arrInt, logFile);
 	printArray(arrFloat, logFile);
+	cout << FG_ORANGE << "Specification C1 End" << RST << endl;
+
+	// Speciﬁcation C2 – Sum
+	cout << FG_RED << "Specification C2 Start" << RST << endl;
+	arraySum(arrInt, logFile);
+	arraySum(arrFloat, logFile);
+	cout << FG_RED << "Specification C2 End" << RST << endl;
+
+	// Speciﬁcation C3 – Min and Max
+	cout << FG_ORANGE << "Specification C3 Start" << RST << endl;
 	minAndMax(arrInt, arrFloat, logFile);
+	announceFunction(__func__, F_END, logFile);
+	cout << FG_ORANGE << "Specification C3 End" << RST << endl;
+
+	// Speciﬁcation B2 – A Ray Reversal 
+	cout << FG_RED << "Specification B2 Start" << RST << endl;
+	arrayRev(arrInt, logFile);
+	arrayRev(arrFloat, logFile);
+	cout << FG_RED << "Specification B2 End" << RST << endl;
+	
+	// Speciﬁcation B3 - Element Shift
+	cout << FG_ORANGE << "Specification B3 Start" << RST << endl;
+	arrayShiftRight(arrInt, logFile);
+	arrayShiftRight(arrFloat, logFile);
+	cout << FG_ORANGE << "Specification B3 End" << RST << endl;
+
+	// Specification A2 - Implement a Stack
+	cout << FG_RED << "Specification A2 Start" << RST << endl;
+	loadStack(logFile);
+	printStack(logFile);
+	cout << FG_RED << "Specification A2 End" << RST << endl;
+
+	cout << FG_ORANGE << "Specification B1 Start" << RST << endl;
+	printArray(arrInt, logFile);
+	printArray(arrFloat, logFile);
+	numberSearch(arrInt, arrFloat, logFile);
+	cout << FG_ORANGE << "Specification B1 End" << RST << endl;
+}
+
+void numberSearch(int intArray[], float fltArray[], ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	string tmpprompt = "Enter a number to see if it is in the array: ";
+	float guess = promptFloatInRange(tmpprompt, RNG_MIN, RNG_MAX, logFile);
+	int intGuess = guess;
+	bool found = false;
+	cout << "Checking integer array for " << intGuess << endl;
+	for (int i=0; i<ARRAY_SIZE; i++){
+		if (intArray[i] == guess){
+			found = true;
+		}
+	}
+	if (found){
+		cout << "Number was found in the integer array!\n";
+	}else{
+		cout << "Number was NOT found in the integer array!\n";
+	}
+
+	found=false;
+	float max = (1+COMP_TOLERANCE)*guess;
+	float min = (1-COMP_TOLERANCE)*guess;
+	cout << fixed << setprecision(3) << "Checking float array for a number between " << min << " and " << max << endl;
+	for (int i=0; i<ARRAY_SIZE; i++){
+		if (fltArray[i] > min && fltArray[i] < max){
+			found = true;
+		}
+	}
+	if (found){
+		cout << "Number was found in the float array!\n";
+	}else{
+		cout << "Number was NOT found in the float array!\n";
+	}
+	announceFunction(__func__, F_END, logFile);
+}
+
+void arraySum(int intArray[], ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	int sum = 0;
+	for (int i = 0; i < ARRAY_SIZE; i++){
+		sum += intArray[i];
+	}
+	cout << "The total of all integers in the integer array is: " << sum << endl;;
+	announceFunction(__func__, F_END, logFile);
+}
+void arraySum(float floatArray[], ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	float sum = 0;
+	for (int i = 0; i < ARRAY_SIZE; i++){
+		sum += floatArray[i];
+	}
+	cout << "The total of all floats in the float array is: " << sum << endl;
+	announceFunction(__func__, F_END, logFile);
+}
+
+void arrayRev(int*& intArray, ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	int* tmp = nullptr;
+	tmp = new int[ARRAY_SIZE];
+	cout << "Integer array contents before reversal:\n";
+	printRow(intArray, logFile);
+	for (int i = 0; i < ARRAY_SIZE; i++){
+		tmp[ARRAY_SIZE-1-i] = intArray[i];
+	}
+	delete [] intArray;
+	intArray = tmp;
+	tmp = nullptr;
+	cout << "\nInteger array contents after reversal:\n";
+	printRow(intArray, logFile);
+	announceFunction(__func__, F_END, logFile);
+}
+void arrayRev(float*& floatArray, ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	float* tmp = nullptr;
+	tmp = new float[ARRAY_SIZE];
+	cout << "\n\nFloat array contents before reversal:\n";
+	printRow(floatArray, logFile);
+	for (int i = 0; i < ARRAY_SIZE; i++){
+		tmp[ARRAY_SIZE-1-i] = floatArray[i];
+	}
+	delete [] floatArray;
+	floatArray = tmp;
+	tmp = nullptr;
+	cout << "\nFloat array contents after reversal:\n";
+	printRow(floatArray, logFile);
+	announceFunction(__func__, F_END, logFile);
+}
+
+void arrayShiftRight(int*& intArray, ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	int* tmp = nullptr;
+	tmp = new int[ARRAY_SIZE];
+	cout << "\n\nInteger array contents before shift:\n";
+	printRow(intArray, logFile);
+	for (int i = 0; i < ARRAY_SIZE; i++){
+		if (i == ARRAY_SIZE-1){
+			tmp[0] = intArray[i];
+		}else{
+			tmp[i+1] = intArray[i];
+		}
+	}
+	delete [] intArray;
+	intArray = tmp;
+	tmp = nullptr;
+	cout << "\nInteger array contents after shift:\n";
+	printRow(intArray, logFile);
+	announceFunction(__func__, F_END, logFile);
+}
+void arrayShiftRight(float*& floatArray, ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	float* tmp = nullptr;
+	tmp = new float[ARRAY_SIZE];
+	cout << "\n\nFloat array contents before shift:\n";
+	printRow(floatArray, logFile);
+	for (int i = 0; i < ARRAY_SIZE; i++){
+		if (i == ARRAY_SIZE-1){
+			tmp[0] = floatArray[i];
+		}else{
+			tmp[i+1] = floatArray[i];
+		}
+	}
+	delete [] floatArray;
+	floatArray = tmp;
+	tmp = nullptr;
+	cout << "\nFloat array contents after shift:\n";
+	printRow(floatArray, logFile);
 	announceFunction(__func__, F_END, logFile);
 }
 
 void minAndMax(int intArr[],float fltArr[], ofstream& logFile){
 	announceFunction(__func__, F_START, logFile);
+	float min = RNG_MAX;
+	float max = RNG_MIN;
 	for (int i = 0; i<ARRAY_SIZE; i++){
-		cout << intArr[i];
+		if (intArr[i] < min) min = intArr[i];
+		if (intArr[i] > max) max = intArr[i];
 	}
+	cout << "The max integer is: " << max << endl;
+	cout << "The min integer is: " << min << endl;
 	cout << endl;
-	announceFunction(__func__, F_END, logFile);
-}
 
-void arraySum(float fltArr[], ofstream& logFile){
-	announceFunction(__func__, F_START, logFile);
-	announceFunction(__func__, F_END, logFile);
-}
+	min = RNG_MAX;
+	max = RNG_MIN;
+	for (int i = 0; i<ARRAY_SIZE; i++){
+		if (fltArr[i] < min) min = fltArr[i];
+		if (fltArr[i] > max) max = fltArr[i];
+	}
+	cout << "The max float is: " << max << endl;
+	cout << "The min float is: " << min << endl;
 
-void arraySum(int intArr[], ofstream& logFile){
-	announceFunction(__func__, F_START, logFile);
 	announceFunction(__func__, F_END, logFile);
 }
 
 void printArray(int intArr[], ofstream& logFile){
 	announceFunction(__func__, F_START, logFile);
-	for (int i=0; i<ARRAY_SIZE; i++){
-		cout << intArr[i] << " ";
-		logFile << intArr[i] << " ";
-	}
+	printRow(intArr, logFile);
 	cout << endl;
 	logFile << endl;
 	announceFunction(__func__, F_END, logFile);
@@ -136,15 +317,33 @@ void printArray(int intArr[], ofstream& logFile){
 
 void printArray(float fltArr[], ofstream& logFile){
 	announceFunction(__func__, F_START, logFile);
-	cout << fixed << setprecision(3);
-	for (int i=0; i<ARRAY_SIZE; i++){
-		cout << fltArr[i] << " ";
-		logFile << fltArr[i] << " ";
-	}
+	printRow(fltArr, logFile);
 	cout << endl;
 	logFile << endl;
 	announceFunction(__func__, F_END, logFile);
 	
+}
+
+void loadStack(ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	SpontaneousDigitDispenser& rng = rng.getInstance(); 
+	for (int i=0; i<STACK_SIZE; i++){
+		rng.dispenseInt();
+		cout << "Pushing " << rng.getIntValue() << " to the stack.\n";
+		tempstack.push(rng.getIntValue());
+	}
+	announceFunction(__func__, F_END, logFile);
+}
+void printStack(ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	int* tmp = new int[STACK_SIZE];
+	for (int i=0; i<STACK_SIZE; i++){
+		tmp[i] = tempstack.top();
+		tempstack.pop();
+	}
+	cout << "Displaying contents of stack:\n";
+	printStackRow(tmp, logFile);
+	announceFunction(__func__, F_END, logFile);
 }
 
 void initializeArrays(int*& intArr, float*& fltArr, ofstream& logFile){
@@ -192,7 +391,7 @@ void ProgramGreeting(ofstream& logFile) {
 	cout << string('*',62) << "\nWelcome to  " << PROGRAM_NAME << "!!" << endl 
 		 << "Author: " << PROGRAM_AUTHOR << endl
 		 << "Date: " << put_time(&tm, "%A %d, %Y") << '\n'
-		 << string('*',62) << endl;
+		 << string('*',62) << endl << endl << endl;
 
 	announceFunction(__func__, F_END, logFile);
 }
@@ -283,14 +482,125 @@ bool isInt(string inStr, ofstream& logFile){
 	return isValid;
 }
 
-void printRow(float inFlt1, float inFlt2, bool printCap, ofstream& logFile){
+void printStackRow(int inInt[], ofstream& logFile){
 	announceFunction(__func__, F_START, logFile);
-    char div = (printCap) ? '=':'-';
-    if (printCap){
-        cout << "|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";    
-    };
-    cout << fixed << setprecision(3)  << "|" << setw(VAR_COL_WIDTH) << inFlt1 << "|" << setw(VAR_COL_WIDTH);
-	cout << inFlt2 << "|\n|" << string(VAR_COL_WIDTH,div) << "|" << string(VAR_COL_WIDTH,div) << "|\n";
+	char div = '=';
+
+	for (int i=0; i<=STACK_SIZE; i++){
+		cout << "|" << string(VAR_COL_WIDTH-4, div);
+	}
+	cout << "|" << endl;
+
+	for (int i=0; i<=STACK_SIZE; i++){
+		if (i){
+		cout << "|" << setw(VAR_COL_WIDTH-4) << i-1;
+		}else{
+			cout << "|" << setw(VAR_COL_WIDTH-4) << "Index";
+		}
+	}
+	cout << "|" << endl;
+	for (int i=0; i<=STACK_SIZE; i++){
+		cout << "|" << string(VAR_COL_WIDTH-4, div);
+	}
+	cout << "|" << endl;
+    
+    cout << fixed << setprecision(3) << "|";
+	for (int i=0; i<STACK_SIZE; i++){
+		if (i){
+			cout << setw(VAR_COL_WIDTH-4) << inInt[i] << "|";	
+		}else{
+			cout << setw(VAR_COL_WIDTH-4) << " " << "|" << setw(VAR_COL_WIDTH-4) << inInt[i] << "|";
+		}
+		
+	}
+
+	cout << endl;
+	for (int i=0; i<=STACK_SIZE; i++){
+			cout << "|" << string(VAR_COL_WIDTH-4, div);
+	}
+    cout << "|" << endl;
+	announceFunction(__func__, F_END, logFile);
+}
+
+void printRow(float inFlt[], ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	char div = '=';
+
+	cout << "Contents of float array: \n";
+	for (int i=0; i<=ARRAY_SIZE; i++){
+		cout << "|" << string(VAR_COL_WIDTH, div);
+	}
+	cout << "|" << endl;
+
+	for (int i=0; i<=ARRAY_SIZE; i++){
+		if (i){
+		cout << "|" << setw(VAR_COL_WIDTH) << i-1;
+		}else{
+			cout << "|" << setw(VAR_COL_WIDTH) << "Index";
+		}
+	}
+	cout << "|" << endl;
+	for (int i=0; i<=ARRAY_SIZE; i++){
+		cout << "|" << string(VAR_COL_WIDTH, div);
+	}
+	cout << "|" << endl;
+    
+    cout << fixed << setprecision(3) << "|";
+	for (int i=0; i<ARRAY_SIZE; i++){
+		if (i){
+			cout << setw(VAR_COL_WIDTH) << inFlt[i] << "|";	
+		}else{
+			cout << setw(VAR_COL_WIDTH) << " " << "|" << setw(VAR_COL_WIDTH) << inFlt[i] << "|";
+		}
+		
+	}
+
+	cout << endl;
+	for (int i=0; i<=ARRAY_SIZE; i++){
+			cout << "|" << string(VAR_COL_WIDTH, div);
+	}
+    cout << "|" << endl;
+	announceFunction(__func__, F_END, logFile);
+}
+
+void printRow(int inInt[], ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	char div = '=';
+
+	cout << "Contents of integer array: \n";
+	for (int i=0; i<=ARRAY_SIZE; i++){
+		cout << "|" << string(VAR_COL_WIDTH, div);
+	}
+	cout << "|" << endl;
+
+	for (int i=0; i<=ARRAY_SIZE; i++){
+		if (i){
+		cout << "|" << setw(VAR_COL_WIDTH) << i-1 ;
+		}else{
+			cout << "|" << setw(VAR_COL_WIDTH) << "Index";
+		}
+	}
+	cout << "|" << endl;
+	for (int i=0; i<=ARRAY_SIZE; i++){
+		cout << "|" << string(VAR_COL_WIDTH, div);
+	}
+	cout << "|" << endl;
+    
+    cout << fixed << setprecision(3) << "|";
+	for (int i=0; i<ARRAY_SIZE; i++){
+		if (i){
+			cout << setw(VAR_COL_WIDTH) << inInt[i] << "|";	
+		}else{
+			cout << setw(VAR_COL_WIDTH) << " " << "|" << setw(VAR_COL_WIDTH) << inInt[i] << "|";
+		}
+		
+	}
+
+	cout << endl;
+	for (int i=0; i<=ARRAY_SIZE; i++){
+			cout << "|" << string(VAR_COL_WIDTH, div);
+	}
+    cout << "|" << endl;
 	announceFunction(__func__, F_END, logFile);
 }
 
@@ -304,4 +614,37 @@ string strToUpper(string inStr, ofstream& logFile)
 	}
 	announceFunction(__func__, F_END, logFile);
     return outStr;
+}
+
+float promptFloatInRange(string prompt, float min, float max, ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	bool isValid = false;
+	string inStr = "";
+	float floatIn;
+
+	while (!isValid){
+		inStr = getPrompt(prompt, logFile);
+		if (isInt(inStr, logFile) or isFloat(inStr, logFile)){
+			floatIn = stof(inStr);
+			if (floatIn >= min and floatIn <= max){
+				isValid = true;
+			}else{
+				cout << FG_RED << to_string(floatIn) + " is not a valid option. Must be between " + to_string(min) + " and " + to_string(max) << RST;
+			}
+		}else{
+			cout << FG_RED << "You have entered an invalid option [" + inStr + "]. Please try again...\n\n" << RST;
+		}
+	}
+	announceFunction(__func__, F_END, logFile);
+	return floatIn;
+}
+
+string getPrompt(string prompt, ofstream& logFile){
+	announceFunction(__func__, F_START, logFile);
+	string strIn;
+
+	cout << prompt;
+	cin >> strIn;
+	announceFunction(__func__, F_END, logFile);
+	return strIn;
 }
