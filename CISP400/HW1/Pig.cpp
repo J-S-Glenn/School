@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iostream>		// Any other libraties, too
 #include <string>
+#include <limits>
 using namespace std;
 
 
@@ -95,8 +96,8 @@ class SpontaneousDigitDispenser{
 class pigGame{
 	private:
 		enum action{
-			ROLL,
 			HOLD,
+			ROLL,
 			QUIT
 		};
 		enum player{
@@ -113,7 +114,8 @@ class pigGame{
          |_\  |--^.  /
         /_]'|_| /_)_/
            /_]'  /_]')""\n";
-		string retry_menu = R"( .----------------. .----------------. .----------------. .----------------.                                       
+		string retry_menu = R"(
+ .----------------. .----------------. .----------------. .----------------.                                       
 | .--------------. | .--------------. | .--------------. | .--------------. |                                      
 | |   ______     | | |   _____      | | |      __      | | |  ____  ____  | |                                      
 | |  |_   __ \   | | |  |_   _|     | | |     /  \     | | | |_  _||_  _| | |                                      
@@ -165,7 +167,7 @@ class pigGame{
 		void performAction();
 		void getAction();
 		void playerTurn();
-		void startGame();
+		void startGame(int* hiScore);
 		void getCurrentScores();
 		void rollDice();
 		void AITurn();
@@ -202,7 +204,9 @@ int pigGame::promptIntInRange(string prompt, int min, int max)
   float floatIn;
 
   while (!isValid){
-    inStr = getPrompt(prompt);
+    do{
+	inStr = getPrompt(prompt);
+	}while(inStr.length() == 0);
     if (isInt(inStr)){
       floatIn = stof(inStr);
       if (floatIn >= min && floatIn <= max){
@@ -220,13 +224,13 @@ int pigGame::promptIntInRange(string prompt, int min, int max)
 
 bool pigGame::promptYN(string prompt)
 {
-    bool isValid = false;
+	bool isValid = false;
     string strIn;
 	do{
         cout << prompt;
 		getline(cin, strIn);
-	}while((strIn.length() != 1) || (tolower(strIn[0]) != 'n' && tolower(strIn[0]) != 'y' ));
-	if (tolower(strIn[0]) == 'y'){
+	}while((strIn.length() > 1) || (strIn.length() == 1 && (tolower(strIn[0]) != 'n' && tolower(strIn[0]) != 'y' )));
+	if (strIn.length() == 0 || tolower(strIn[0]) == 'y'){
 		return true;
 	}else{
 		return false;
@@ -251,7 +255,7 @@ string pigGame::getPrompt(string prompt)
   string strIn;
 
   cout << prompt;
-  cin >> strIn;
+  getline(cin,strIn);
   myScribe.announceFunction(__func__, F_END);
   return strIn;
 }
@@ -266,7 +270,10 @@ int pigGame::D6()
 	myScribe.announceFunction(__func__, F_START);
 	cout << "Rolling dice!\n";
 	int result = RandomNumber(1,6);
-	cout << hPlayer << " has rolled a " << result << endl;
+	if (currentPlayer == PLAYER){
+		cout << hPlayer << " has rolled a " << result << endl;
+	}else{cout << "AI has rolled a " << result << endl;}
+
 	myScribe.announceFunction(__func__, F_END);
     return result;
 }
@@ -294,7 +301,7 @@ void pigGame::getPlayerName()
 	} while (!name);
 }
 
-void pigGame::startGame()
+void pigGame::startGame(int* hiScore)
 {
 	getFirstPlayer();
 	do{
@@ -306,30 +313,38 @@ void pigGame::startGame()
 				AITurn();
 			}
 		}while(!turnEnd);
-		if (currentPlayer == PLAYER) currentPlayer = AI;
-		if (currentPlayer == AI) currentPlayer = PLAYER;
+		if (currentPlayer == PLAYER){
+			currentPlayer = AI;
+		}else if (currentPlayer == AI){
+			currentPlayer = PLAYER;
+		}
 	}while(player_grand_total < WIN && ai_grand_total < WIN);
+	if (*hiScore < ai_grand_total){*hiScore = ai_grand_total;}
+	if (*hiScore < player_grand_total){*hiScore = player_grand_total;}
+	ai_grand_total = 0;
+	player_grand_total = 0;
 };
 
 void pigGame::rollDice()
 {
 	roll = D6();
 	if(currentPlayer == PLAYER){
-		cout << hPlayer << " rolled a " << roll << ".\n";
 		if (roll > 1){
-			cout << roll << " points added to score!";
-			player_total += roll;
+			cout << roll << " points added to score!\n";
+			player_total += roll*1000;
 		}else{
 			cout << "Turn Lost!\n";
+			player_total =0;
 			turnEnd = true;
 		}
 
 	}else{
-		cout << "AI Rolled a " << roll;
 		if (roll > 1){
-			cout << roll << " points added to score!";
-			ai_total += roll;
+			cout << roll << " points added to score!\n";
+			ai_total += roll*1000;
 		}else{
+			ai_total = 0;
+			cout << "Turn Lost!\n";
 			turnEnd = true;
 		}
 
@@ -338,18 +353,18 @@ void pigGame::rollDice()
 
 void pigGame::getCurrentScores()
 {
-	cout <<  "-" << setw(20) << "Player" << "|" << setw(11) << "Total" << "|" << setw(11) << "Grand Total" << "-\n"
-	     << "|" << setw(20) << hPlayer << "|" << setw(11) << player_total << "|" << setw(11) << player_grand_total << "|\n"
-		 <<  "-" << string('-',20) << "|" << string('-',11) << "|" << string('-',21) << endl
-		 << "|" << setw(20) << "AI" << "|" << setw(11) << ai_total << "|" << setw(11) << ai_grand_total << "|\n"
-		 <<  "-" << string('-',20) << "|" << string('-',11) << "|" << string('-',21) << endl;
+	cout << "-------Player-------|---Total---|Grand Total-\n"
+	     << "|" << setw(19) << hPlayer << "|" << setw(11) << player_total << "|" << setw(11) << player_grand_total << "|\n"
+		 <<  "-" << string(19,'-') << "|" << string(11,'-') << "|------------\n"
+		 << "|" << setw(19) << "AI" << "|" << setw(11) << ai_total << "|" << setw(11) << ai_grand_total << "|\n"
+		 <<  "-" << string(19,'-') << "|" << string(11,'-') << "|------------\n" ;
 } 
 
+// Specification C3 - Numeric Menu
 void pigGame::getAction()
 {
-    getCurrentScores();
-	int choice = promptIntInRange("What would you like to do?\n\n\t1. Roll\n\t2. Hold\n\t3. Quit\n\nEnter selection and press ENTER: ",1,3);
-	actionChoice = static_cast<action>(choice);
+	int choice = promptIntInRange("What would you like to do?\n\n\t1. Hold\n\t2. Roll\n\t3. Quit\n\nEnter selection and press ENTER: ",1,3);
+	actionChoice = static_cast<action>(choice-1);
 }
 
 void pigGame::playerTurn()
@@ -358,6 +373,7 @@ void pigGame::playerTurn()
 	turnEnd = false;
 	if (actionChoice == HOLD){
 		player_grand_total += player_total;
+		player_total = 0;
 		turnEnd = true;
 	}else if(actionChoice == ROLL){
 		rollDice();
@@ -368,13 +384,19 @@ void pigGame::playerTurn()
 
 void pigGame::AITurn()
 {
-	int choice = D6();
+	int choice;
 	turnEnd = false;
+	
 	do{
+	cout << "AI is deciding whether or not to hold.\n";
+	choice = D6();
 	if (choice >= 1 && choice <= 3){
+		cout << "AI is holding.\n";
 		turnEnd = true;
 		ai_grand_total += ai_total;
+		ai_total = 0;
 	}else{
+		cout << "AI is NOT holding.\n";
 		actionChoice = ROLL;
 		rollDice();
 	}}while(!turnEnd);
@@ -398,26 +420,30 @@ void pigGame::getFirstPlayer()
 	bool flip = dice.coinFlip();
 
 	if (pick == flip){
-		cout << "Player goes first!";
+		cout << "Player goes first!\n";
 		currentPlayer = PLAYER;
 	}else{
-		cout << "The AI goes first!";
+		cout << "The AI goes first!\n";
 		currentPlayer = AI;
 	}
 }
 
 pigGame::pigGame()
 {
+// Specification B3 - hiScore on Heap
+			int* hiScore;
+			hiScore = new int(0);
 			myScribe.announceFunction(__func__, "Initializing Pig");
 			welcome();
 			getPlayerName();
 			game_count = 0;
 			do{
 				game_count++;
-				startGame();
+				startGame(hiScore);
 				// Specification A4 - Play Again Option
-				playAgain = promptYN((retry_menu + "\nWould you like to play again?"));
+				playAgain = promptYN((retry_menu + "\nGames Played: " + to_string(game_count) + "\nCurrent High Score: " + to_string(*hiScore) + "\nWould you like to play again? [Y|n]"));
 			}while(playAgain);
+			delete hiScore;
 			myScribe.announceFunction(__func__, "Exiting Pig");
 }
 
