@@ -24,21 +24,27 @@ class jlogger{
 			static jlogger instance;
 			return instance;
 		}
+		
 		void initialize(string app_Name = "My Program", string auth_Name = "John S. Glenn", string logfile = "log.txt"){
 			appName = app_Name;
 			authName = auth_Name;
 			log_file = logfile;
 			obLogFile.open(log_file);
+			if (!obLogFile.is_open()) {
+ 			   	cerr << "Error: Could not open log file " << log_file << endl;
+    			exit(1);
+			}
 			initLogFile();
 			ProgramGreeting();
 		}
 
-//Specification B2 - Function Activity to Disk
+		//Specification B2 - Function Activity to Disk
 		void announceFunction(string funcName, string action){
-	time_t t = std::time(nullptr);
-	tm tm = *std::localtime(&t);
-	obLogFile <<  put_time(&tm, "%F %T") <<  "\tFunction " << funcName << "() " << action << "\n";
-}
+		time_t t = std::time(nullptr);
+		tm tm = *std::localtime(&t);
+		obLogFile <<  put_time(&tm, "%F %T") <<  "\tFunction " << funcName << "() " << action << "\n";
+		}
+
 		void ProgramGreeting(){
 			announceFunction(__func__, F_START);
 			std::time_t t = std::time(nullptr);
@@ -164,7 +170,6 @@ class pigGame{
 		int D6();
 		int RandomNumber(int, int);
 		void getPlayerName();
-		void performAction();
 		void getAction();
 		void playerTurn();
 		void startGame(int* hiScore);
@@ -175,11 +180,9 @@ class pigGame{
 		void getFirstPlayer();
 	public:
 		pigGame();
-
 };
 
 int main() {
-
     // Set up logging
     clock_t start = clock();
     jlogger& myScribe = myScribe.getInstance();
@@ -196,8 +199,7 @@ int main() {
   	myScribe.announceFunction(__func__, "Total runtime: " + to_string(total_runtime) + " sec");
 }
 
-int pigGame::promptIntInRange(string prompt, int min, int max)
-{
+int pigGame::promptIntInRange(string prompt, int min, int max){
   myScribe.announceFunction(__func__, F_START);
   bool isValid = false;
   string inStr = "";
@@ -222,14 +224,15 @@ int pigGame::promptIntInRange(string prompt, int min, int max)
   return floatIn;
 }
 
-bool pigGame::promptYN(string prompt)
-{
+bool pigGame::promptYN(string prompt){
+	myScribe.announceFunction(__func__, F_START);
 	bool isValid = false;
     string strIn;
 	do{
         cout << prompt;
 		getline(cin, strIn);
 	}while((strIn.length() > 1) || (strIn.length() == 1 && (tolower(strIn[0]) != 'n' && tolower(strIn[0]) != 'y' )));
+	myScribe.announceFunction(__func__, F_END);
 	if (strIn.length() == 0 || tolower(strIn[0]) == 'y'){
 		return true;
 	}else{
@@ -238,8 +241,7 @@ bool pigGame::promptYN(string prompt)
 
 }
 
-bool pigGame::isInt(string inStr)
-{
+bool pigGame::isInt(string inStr){
   myScribe.announceFunction(__func__, F_START);
   bool isValid;
 
@@ -249,24 +251,24 @@ bool pigGame::isInt(string inStr)
   myScribe.announceFunction(__func__, F_END);
   return isValid;
 }
-string pigGame::getPrompt(string prompt)
-{
+string pigGame::getPrompt(string prompt){
   myScribe.announceFunction(__func__, F_START);
   string strIn;
-
   cout << prompt;
   getline(cin,strIn);
   myScribe.announceFunction(__func__, F_END);
   return strIn;
 }
-bool pigGame::exitGame()
-{
+
+bool pigGame::exitGame(){
+	myScribe.announceFunction(__func__, F_START);
 	myScribe.announceFunction(__func__,"Game Exiting...");
+	myScribe.announceFunction(__func__, F_END);
 	return false;
 }
+
 // Specification A1 - D6() function
-int pigGame::D6()
-{
+int pigGame::D6(){
 	myScribe.announceFunction(__func__, F_START);
 	cout << "Rolling dice!\n";
 	int result = RandomNumber(1,6);
@@ -279,8 +281,7 @@ int pigGame::D6()
 }
 
 // Specification A2 - RandomNumber() function
-int pigGame::RandomNumber(int hi, int low)
-{
+int pigGame::RandomNumber(int hi, int low){
 	myScribe.announceFunction(__func__, F_START);
 	int result = dice.dispenseInt(hi,low);
 	myScribe.announceFunction(__func__, ("Getting number between " + to_string(low) + " and " + to_string(hi)));
@@ -290,19 +291,20 @@ int pigGame::RandomNumber(int hi, int low)
 }
 
 // Specification C2 - Student Name
-void pigGame::getPlayerName()
-{
+void pigGame::getPlayerName(){
+	myScribe.announceFunction(__func__, F_START);
 	bool name = false;
 	do{
-	cout << "What is your name (First Last)? ";
-	getline(cin, hPlayer);
-	cout << "Name entered: " << hPlayer << "\n";
-	name = promptYN("Is this correct? [Y/n]");
+		cout << "What is your name (First Last)? ";
+		getline(cin, hPlayer);
+		cout << "Name entered: " << hPlayer << "\n";
+		name = promptYN("Is this correct? [Y/n]");
 	} while (!name);
+	myScribe.announceFunction(__func__, F_END);
 }
 
-void pigGame::startGame(int* hiScore)
-{
+void pigGame::startGame(int* hiScore){
+	myScribe.announceFunction(__func__, F_START);
 	getFirstPlayer();
 	do{
 		do{
@@ -323,10 +325,11 @@ void pigGame::startGame(int* hiScore)
 	if (*hiScore < player_grand_total){*hiScore = player_grand_total;}
 	ai_grand_total = 0;
 	player_grand_total = 0;
+	myScribe.announceFunction(__func__, F_END);
 };
 
-void pigGame::rollDice()
-{
+void pigGame::rollDice(){
+	myScribe.announceFunction(__func__, F_START);
 	roll = D6();
 	if(currentPlayer == PLAYER){
 		if (roll > 1){
@@ -349,26 +352,30 @@ void pigGame::rollDice()
 		}
 
     }
+	myScribe.announceFunction(__func__, F_END);
 }
 
-void pigGame::getCurrentScores()
-{
+// Specification B1 - Display Turn Stats
+void pigGame::getCurrentScores(){
+	myScribe.announceFunction(__func__, F_START);
 	cout << "-------Player-------|---Total---|Grand Total-\n"
 	     << "|" << setw(19) << hPlayer << "|" << setw(11) << player_total << "|" << setw(11) << player_grand_total << "|\n"
 		 <<  "-" << string(19,'-') << "|" << string(11,'-') << "|------------\n"
 		 << "|" << setw(19) << "AI" << "|" << setw(11) << ai_total << "|" << setw(11) << ai_grand_total << "|\n"
 		 <<  "-" << string(19,'-') << "|" << string(11,'-') << "|------------\n" ;
+		 myScribe.announceFunction(__func__, F_END);
 } 
 
 // Specification C3 - Numeric Menu
-void pigGame::getAction()
-{
+void pigGame::getAction(){
+	myScribe.announceFunction(__func__, F_START);
 	int choice = promptIntInRange("What would you like to do?\n\n\t1. Hold\n\t2. Roll\n\t3. Quit\n\nEnter selection and press ENTER: ",1,3);
 	actionChoice = static_cast<action>(choice-1);
+	myScribe.announceFunction(__func__, F_END);
 }
 
-void pigGame::playerTurn()
-{
+void pigGame::playerTurn(){
+	myScribe.announceFunction(__func__, F_START);
 	getAction();
 	turnEnd = false;
 	if (actionChoice == HOLD){
@@ -378,12 +385,14 @@ void pigGame::playerTurn()
 	}else if(actionChoice == ROLL){
 		rollDice();
 	}else if(actionChoice == QUIT){
+		myScribe.announceFunction(__func__, F_END);
 		exit(0);
 	}
+	myScribe.announceFunction(__func__, F_END);
 }
 
-void pigGame::AITurn()
-{
+void pigGame::AITurn(){
+	myScribe.announceFunction(__func__, F_START);
 	int choice;
 	turnEnd = false;
 	
@@ -400,15 +409,17 @@ void pigGame::AITurn()
 		actionChoice = ROLL;
 		rollDice();
 	}}while(!turnEnd);
+	myScribe.announceFunction(__func__, F_END);
 }
 
-void pigGame::welcome()
-{
+void pigGame::welcome(){
+	myScribe.announceFunction(__func__, F_START);
 	cout << "\n\tWelcom to Pig!\n\n" << PIG_ART << "\n\n";
+	myScribe.announceFunction(__func__, F_END);
 }
 
-void pigGame::getFirstPlayer()
-{
+void pigGame::getFirstPlayer(){
+	myScribe.announceFunction(__func__, F_START);
 	cout << "Let's get started by deciding who goes first.\n";
 	int pick = promptIntInRange("Choose heads or tails! [0 = heads, 1 = tails]",0,1);
 	if (pick){
@@ -426,34 +437,38 @@ void pigGame::getFirstPlayer()
 		cout << "The AI goes first!\n";
 		currentPlayer = AI;
 	}
+	myScribe.announceFunction(__func__, F_END);
 }
 
-pigGame::pigGame()
-{
-// Specification B3 - hiScore on Heap
-			int* hiScore;
-			hiScore = new int(0);
-			myScribe.announceFunction(__func__, "Initializing Pig");
-			welcome();
-			getPlayerName();
-			game_count = 0;
-			do{
-				game_count++;
-				startGame(hiScore);
-				// Specification A4 - Play Again Option
-				playAgain = promptYN((retry_menu + "\nGames Played: " + to_string(game_count) + "\nCurrent High Score: " + to_string(*hiScore) + "\nWould you like to play again? [Y|n]"));
-			}while(playAgain);
-			delete hiScore;
-			myScribe.announceFunction(__func__, "Exiting Pig");
+pigGame::pigGame(){
+	myScribe.announceFunction(__func__, F_START);
+	// Specification B3 - hiScore on Heap
+	int* hiScore;
+	hiScore = new int(0);
+	myScribe.announceFunction(__func__, "Initializing Pig");
+	welcome();
+	getPlayerName();
+	game_count = 0;
+	do{
+		startGame(hiScore);
+		// Specification A3 - Games Played Counter
+		game_count++;
+		// Specification A4 - Play Again Option
+		// Specification B4 – Display hiScore
+		playAgain = promptYN((retry_menu + "\nGames Played: " + to_string(game_count) + "\nCurrent High Score: " + to_string(*hiScore) + "\nWould you like to play again? [Y|n]"));
+	}while(playAgain);
+	delete hiScore;
+	myScribe.announceFunction(__func__, "Exiting Pig");
 }
 
 
-void jlogger::initLogFile()
-{
+void jlogger::initLogFile(){
+	announceFunction(__func__, F_START);
 	time_t t = std::time(nullptr);
 	tm tm = *std::localtime(&t);
 	cout << "New log started at " << put_time(&tm, "%F %T") << endl;
 	obLogFile << "New log started at " << put_time(&tm, "%F %T") << endl;
+	announceFunction(__func__, F_END);
 }
 
 
